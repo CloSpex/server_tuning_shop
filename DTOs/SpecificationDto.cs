@@ -23,9 +23,11 @@ namespace TuningStore.DTOs
         public BodyTypeDto? BodyType { get; set; }
     }
 
+
+
     public class CreateSpecificationDto
     {
-        [Required]
+        [Required(ErrorMessage = "Model ID is required")]
         public int ModelId { get; set; }
 
         public int? EngineTypeId { get; set; }
@@ -40,16 +42,17 @@ namespace TuningStore.DTOs
         [Range(1, 2000, ErrorMessage = "Power must be between 1 and 2000 kilowatts")]
         public double? PowerKilowatts { get; set; }
 
-        [Range(1900, 2030, ErrorMessage = "Start year must be between 1900 and 2030")]
+        [Range(1900, 2100, ErrorMessage = "Year start must be between 1900 and 2100")]
         public int? YearStart { get; set; }
 
-        [Range(1900, 2030, ErrorMessage = "End year must be between 1900 and 2030")]
+        [Range(1900, 2100, ErrorMessage = "Year end must be between 1900 and 2100")]
         public int? YearEnd { get; set; }
     }
 
     public class UpdateSpecificationDto
     {
-        public int? ModelId { get; set; }
+        [Required(ErrorMessage = "Model ID is required")]
+        public int ModelId { get; set; }
 
         public int? EngineTypeId { get; set; }
 
@@ -63,10 +66,10 @@ namespace TuningStore.DTOs
         [Range(1, 2000, ErrorMessage = "Power must be between 1 and 2000 kilowatts")]
         public double? PowerKilowatts { get; set; }
 
-        [Range(1900, 2030, ErrorMessage = "Start year must be between 1900 and 2030")]
+        [Range(1900, 2100, ErrorMessage = "Year start must be between 1900 and 2100")]
         public int? YearStart { get; set; }
 
-        [Range(1900, 2030, ErrorMessage = "End year must be between 1900 and 2030")]
+        [Range(1900, 2100, ErrorMessage = "Year end must be between 1900 and 2100")]
         public int? YearEnd { get; set; }
     }
 }

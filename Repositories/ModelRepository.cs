@@ -13,6 +13,7 @@ namespace TuningStore.Repositories
         Task DeleteAsync(int id);
         Task<bool> ModelExistsAsync(string name);
         Task<IEnumerable<Specification>> GetAllSpecificationsAsync();
+        Task<IEnumerable<Model>> GetByBrandIdAsync(int brandId);
     }
 
     public class ModelRepository : IModelRepository
@@ -62,6 +63,10 @@ namespace TuningStore.Repositories
                 _context.Models.Remove(model);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<IEnumerable<Model>> GetByBrandIdAsync(int brandId)
+        {
+            return await _context.Models.Where(m => m.BrandId == brandId).ToListAsync();
         }
 
         public async Task<bool> ModelExistsAsync(string name)

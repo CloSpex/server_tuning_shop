@@ -10,6 +10,7 @@ namespace TuningStore.DTOs
         public int? Quantity { get; set; }
         public string? ImagePath { get; set; }
         public int? CarSpecificationId { get; set; }
+        public int PartCategoryId { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int? CreatedBy { get; set; }
@@ -29,10 +30,11 @@ namespace TuningStore.DTOs
 
         [Range(0, int.MaxValue, ErrorMessage = "Quantity must be non-negative")]
         public int? Quantity { get; set; }
-
+        public int PartCategoryId { get; set; }
+        public string Color { get; set; } = "#d3d3d3";
         public string? ImagePath { get; set; }
 
-        public int? CarSpecificationId { get; set; }
+        public int CarSpecificationId { get; set; }
     }
 
     public class UpdatePartDto
@@ -48,6 +50,8 @@ namespace TuningStore.DTOs
 
         public string? ImagePath { get; set; }
 
-        public int? CarSpecificationId { get; set; }
+        public int PartCategoryId { get; set; }
+        public string Color { get; set; } = "#d3d3d3";
+        public int CarSpecificationId { get; set; }
     }
 }

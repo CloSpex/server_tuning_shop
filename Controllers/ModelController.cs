@@ -28,6 +28,12 @@ namespace TuningStore.Controllers
             var model = await _modelService.GetModelByIdAsync(id);
             return model != null ? Ok(model) : NotFound();
         }
+        [HttpGet("brand/{brandId}")]
+        public async Task<ActionResult<IEnumerable<ModelDto>>> GetModelsByBrand(int brandId)
+        {
+            var models = await _modelService.GetModelsByBrandIdAsync(brandId);
+            return Ok(models);
+        }
         [HttpPost]
         public async Task<ActionResult<ModelDto>> CreateModel([FromBody] CreateModelDto createModelDto)
         {

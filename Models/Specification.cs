@@ -29,9 +29,16 @@ namespace TuningStore.Models
         [ForeignKey("BodyTypeId")]
         public BodyType BodyType { get; set; }
 
+        [Column("volume_litres")]
         public double? VolumeLitres { get; set; }
+
+        [Column("power_kilowatts")]
         public double? PowerKilowatts { get; set; }
+
+        [Column("year_start")]
         public int? YearStart { get; set; }
+
+        [Column("year_end")]
         public int? YearEnd { get; set; }
         [Column("created_at")]
         public DateTime? CreatedAt { get; set; }

@@ -10,6 +10,7 @@ namespace TuningStore.Services
         Task<ModelDto> CreateModelAsync(CreateModelDto createModelDto);
         Task<ModelDto?> UpdateModelAsync(int id, UpdateModelDto updateModelDto);
         Task<bool> DeleteModelAsync(int id);
+        Task<IEnumerable<ModelDto>> GetModelsByBrandIdAsync(int brandId);
     }
     public class ModelService : IModelService
     {
@@ -72,6 +73,11 @@ namespace TuningStore.Services
 
             await _modelRepository.UpdateAsync(model);
             return MapToDto(model);
+        }
+        public async Task<IEnumerable<ModelDto>> GetModelsByBrandIdAsync(int brandId)
+        {
+            var models = await _modelRepository.GetByBrandIdAsync(brandId);
+            return models.Select(MapToDto);
         }
 
         public async Task<bool> DeleteModelAsync(int id)

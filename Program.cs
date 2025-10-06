@@ -7,13 +7,14 @@ using TuningStore.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using TuningStore.Authorization.Requirements;
 using TuningStore.Authorization.Policies;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -94,17 +95,18 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IModelRepository, ModelRepository>();
 builder.Services.AddScoped<IModelService, ModelService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ISpecificationRepository, SpecificationRepository>();
+builder.Services.AddScoped<ISpecificationService, SpecificationService>();
+builder.Services.AddScoped<IPartRepository, PartRepository>();
+builder.Services.AddScoped<IPartService, PartService>();
+builder.Services.AddOpenApi();
 
 builder.WebHost.UseUrls("http://localhost:5099");
 var app = builder.Build();
-
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
