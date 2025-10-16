@@ -2,18 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TuningStore.DTOs
 {
-    public class FAQDto
+    public class FAQDto : BaseCreatorDto
     {
-        public int Id { get; set; }
         public string Question { get; set; } = string.Empty;
         public string? Answer { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? UpdatedBy { get; set; }
-
-        public UserDto? Creator { get; set; }
-        public UserDto? Updater { get; set; }
     }
 
     public class CreateFAQDto

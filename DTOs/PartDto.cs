@@ -2,21 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TuningStore.DTOs
 {
-    public class PartDto
+    public class PartDto : BaseCreatorDto
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public decimal? Price { get; set; }
         public int? Quantity { get; set; }
-        public string? ImagePath { get; set; }
+        public string ImagePath { get; set; } = "images/default_part_image.jpg";
         public int? CarSpecificationId { get; set; }
-        public int PartCategoryId { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? UpdatedBy { get; set; }
-        public UserDto? Creator { get; set; }
-        public UserDto? Updater { get; set; }
+        public int? PartCategoryId { get; set; }
     }
 
     public class CreatePartDto
@@ -50,8 +43,8 @@ namespace TuningStore.DTOs
 
         public string? ImagePath { get; set; }
 
-        public int PartCategoryId { get; set; }
-        public string Color { get; set; } = "#d3d3d3";
-        public int CarSpecificationId { get; set; }
+        public int? PartCategoryId { get; set; }
+        public string? Color { get; set; } = "#d3d3d3";
+        public int? CarSpecificationId { get; set; }
     }
 }

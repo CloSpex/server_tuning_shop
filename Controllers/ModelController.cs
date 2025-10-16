@@ -28,6 +28,7 @@ namespace TuningStore.Controllers
             var model = await _modelService.GetModelByIdAsync(id);
             return model != null ? Ok(model) : NotFound();
         }
+
         [HttpGet("brand/{brandId}")]
         public async Task<ActionResult<IEnumerable<ModelDto>>> GetModelsByBrand(int brandId)
         {
@@ -43,7 +44,7 @@ namespace TuningStore.Controllers
             var model = await _modelService.CreateModelAsync(createModelDto);
             return CreatedAtAction(nameof(GetModel), new { id = model.Id }, model);
         }
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<ModelDto>> UpdateModel(int id, [FromBody] UpdateModelDto updateModelDto)
         {
             if (!ModelState.IsValid)

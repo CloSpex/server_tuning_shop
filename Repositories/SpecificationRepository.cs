@@ -9,6 +9,8 @@ namespace TuningStore.Repositories
         Task<IEnumerable<Specification>> GetAllAsync();
         Task<Specification?> GetByIdAsync(int id);
         Task<IEnumerable<Specification>> GetByModelIdAsync(int modelId);
+
+        Task<IEnumerable<Specification>> GetAllSpecificationsByModelIdAsync(int modelId);
         Task AddAsync(Specification specification);
         Task UpdateAsync(Specification specification);
         Task DeleteAsync(int id);
@@ -70,11 +72,28 @@ namespace TuningStore.Repositories
 
         public async Task UpdateAsync(Specification specification)
         {
+            var existingSpecification = await _specifications.FindAsync(specification.Id);
+            if (existingSpecification == null)
+                return;
+            if (specification.ModelId != 0)
+                existingSpecification.ModelId = specification.ModelId;
+            if (specification.YearStart != null)
+                existingSpecification.YearStart = specification.YearStart;
+            if (specification.YearEnd != null)
+                existingSpecification.YearEnd = specification.YearEnd;
+            if (specification.EngineTypeId != null)
+                existingSpecification.EngineTypeId = specification.EngineTypeId;
+            if (specification.TransmissionTypeId != null)
+                existingSpecification.TransmissionTypeId = specification.TransmissionTypeId;
+            if (specification.BodyTypeId != null)
+                existingSpecification.BodyTypeId = specification.BodyTypeId;
             specification.UpdatedAt = DateTime.UtcNow;
-            _specifications.Update(specification);
             await _context.SaveChangesAsync();
         }
-
+        public async Task<IEnumerable<Specification>> GetAllSpecificationsByModelIdAsync(int modelId)
+        {
+            return await _specifications.Where(s => s.ModelId == modelId).ToListAsync();
+        }
         public async Task DeleteAsync(int id)
         {
             var specification = await _specifications.FindAsync(id);
@@ -89,5 +108,6 @@ namespace TuningStore.Repositories
         {
             return await _context.Models.AnyAsync(m => m.Id == modelId);
         }
+
     }
 }

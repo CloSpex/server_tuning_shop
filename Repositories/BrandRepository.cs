@@ -12,64 +12,63 @@ namespace TuningStore.Repositories
         Task UpdateAsync(Brand brand);
         Task DeleteAsync(int id);
         Task<bool> BrandExistsAsync(string name);
-        Task<IEnumerable<Model>> GetAllModelsAsync(int id);
     }
 
     public class BrandRepository : IBrandRepository
     {
         private readonly AppDbContext _context;
-
+        private readonly DbSet<Brand> _brands;
         public BrandRepository(AppDbContext context)
         {
             _context = context;
+            _brands = context.Set<Brand>();
         }
 
         public async Task<IEnumerable<Brand>> GetAllAsync()
         {
-            return await _context.Brands.ToListAsync();
+            return await _brands.ToListAsync();
         }
 
         public async Task<Brand?> GetByIdAsync(int id)
         {
-            return await _context.Brands.FindAsync(id);
+            return await _brands.FindAsync(id);
         }
 
         public async Task AddAsync(Brand brand)
         {
             brand.CreatedAt = DateTime.UtcNow;
             brand.UpdatedAt = DateTime.UtcNow;
-            await _context.Brands.AddAsync(brand);
+            await _brands.AddAsync(brand);
             await _context.SaveChangesAsync();
-        }
-        public async Task<IEnumerable<Model>> GetAllModelsAsync(int id)
-        {
-            return await _context.Brands
-                .Where(b => b.Id == id)
-                .Include(b => b.Models)
-                .SelectMany(b => b.Models)
-                .ToListAsync();
         }
 
         public async Task UpdateAsync(Brand brand)
         {
-            brand.UpdatedAt = DateTime.UtcNow;
-            _context.Brands.Update(brand);
+            var existingBrand = await _brands.FindAsync(brand.Id);
+            if (existingBrand == null)
+                return;
+            if (!string.IsNullOrWhiteSpace(brand.Name))
+                existingBrand.Name = brand.Name;
+            if (!string.IsNullOrWhiteSpace(brand.Description))
+                existingBrand.Description = brand.Description;
+            existingBrand.CreatedAt = existingBrand.CreatedAt;
+            existingBrand.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(int id)
         {
-            var brand = await _context.Brands.FindAsync(id);
+            var brand = await _brands.FindAsync(id);
             if (brand != null)
             {
-                _context.Brands.Remove(brand);
+                _brands.Remove(brand);
                 await _context.SaveChangesAsync();
             }
         }
 
         public async Task<bool> BrandExistsAsync(string name)
         {
-            return await _context.Brands.AnyAsync(b => b.Name == name);
+            return await _brands.AnyAsync(b => b.Name == name);
         }
     }
 }

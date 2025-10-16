@@ -54,17 +54,8 @@ namespace TuningStore.Controllers
                 return StatusCode(500, "An error occurred while creating the brand.");
             }
         }
-        [HttpGet("{id}/models")]
-        public async Task<ActionResult<IEnumerable<ModelDto>>> GetModelsByBrandId(int id)
-        {
-            var models = await _brandService.GetAllModelsAsync(id);
-            if (models == null || !models.Any())
-                return NotFound($"No models found for brand with ID {id}.");
 
-            return Ok(models);
-        }
-
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<BrandDto>> UpdateBrand(int id, [FromBody] UpdateBrandDto updateBrandDto)
         {
             if (!ModelState.IsValid)

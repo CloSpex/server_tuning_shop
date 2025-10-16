@@ -12,7 +12,6 @@ using TuningStore.Authorization.Requirements;
 using TuningStore.Authorization.Policies;
 using System.Text;
 using Scalar.AspNetCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -20,6 +19,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
 });
 
 builder.Services.AddCors(options =>
@@ -85,7 +86,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy(AuthorizationPolicies.UserOrAdmin, policy =>
         policy.RequireRole("User", "Admin"));
 });
-
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOwnerHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserRepository, UserRepository>();

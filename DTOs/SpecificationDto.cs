@@ -2,9 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TuningStore.DTOs
 {
-    public class SpecificationDto
+    public class SpecificationDto : BaseCreatorDto
     {
-        public int Id { get; set; }
         public int ModelId { get; set; }
         public int? EngineTypeId { get; set; }
         public int? TransmissionTypeId { get; set; }
@@ -13,10 +12,6 @@ namespace TuningStore.DTOs
         public double? PowerKilowatts { get; set; }
         public int? YearStart { get; set; }
         public int? YearEnd { get; set; }
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? UpdatedBy { get; set; }
 
         public EngineTypeDto? EngineType { get; set; }
         public TransmissionTypeDto? TransmissionType { get; set; }

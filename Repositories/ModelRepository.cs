@@ -12,17 +12,20 @@ namespace TuningStore.Repositories
         Task UpdateAsync(Model model);
         Task DeleteAsync(int id);
         Task<bool> ModelExistsAsync(string name);
-        Task<IEnumerable<Specification>> GetAllSpecificationsAsync();
         Task<IEnumerable<Model>> GetByBrandIdAsync(int brandId);
+
+        Task<IEnumerable<Model>> GetModelsByBrandAsync(int id);
     }
 
     public class ModelRepository : IModelRepository
     {
         private readonly AppDbContext _context;
+        private readonly DbSet<Model> _models;
 
         public ModelRepository(AppDbContext context)
         {
             _context = context;
+            _models = context.Set<Model>();
         }
 
 
@@ -40,18 +43,24 @@ namespace TuningStore.Repositories
         {
             model.CreatedAt = DateTime.UtcNow;
             model.UpdatedAt = DateTime.UtcNow;
-            await _context.Models.AddAsync(model);
+            await _models.AddAsync(model);
             await _context.SaveChangesAsync();
         }
-        public async Task<IEnumerable<Specification>> GetAllSpecificationsAsync()
-        {
-            return await _context.Models.Include(m => m.Specifications).SelectMany(m => m.Specifications).ToListAsync();
-        }
 
+        public async Task<IEnumerable<Model>> GetModelsByBrandAsync(int id)
+        {
+            return await _models.Where(m => m.BrandId == id).ToListAsync();
+        }
         public async Task UpdateAsync(Model model)
         {
-            model.UpdatedAt = DateTime.UtcNow;
-            _context.Models.Update(model);
+            var existingModel = await _models.FindAsync(model.Id);
+            if (existingModel == null)
+                return;
+            if (!string.IsNullOrWhiteSpace(model.Name))
+                existingModel.Name = model.Name;
+            if (existingModel.BrandId != 0)
+                existingModel.BrandId = model.BrandId;
+            existingModel.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
 

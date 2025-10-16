@@ -55,7 +55,7 @@ namespace TuningStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<UserDto>> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid)

@@ -10,7 +10,6 @@ namespace TuningStore.Services
         Task<BrandDto> CreateBrandAsync(CreateBrandDto createBrandDto);
         Task<BrandDto?> UpdateBrandAsync(int id, UpdateBrandDto updateBrandDto);
         Task<bool> DeleteBrandAsync(int id);
-        Task<IEnumerable<Model>> GetAllModelsAsync(int id);
     }
     public class BrandService : IBrandService
     {
@@ -56,14 +55,17 @@ namespace TuningStore.Services
             var brand = await _brandRepository.GetByIdAsync(id);
             if (brand == null)
                 return null;
-
-            if (brand.Name != updateBrandDto.Name && await _brandRepository.BrandExistsAsync(updateBrandDto.Name))
+            if (!string.IsNullOrWhiteSpace(updateBrandDto.Name) &&
+                updateBrandDto.Name != brand.Name &&
+                await _brandRepository.BrandExistsAsync(updateBrandDto.Name))
             {
-                throw new InvalidOperationException("Another brand with the same name already exists.");
+                throw new InvalidOperationException("Brand with the same name already exists.");
             }
 
-            brand.Name = updateBrandDto.Name;
-            brand.Description = updateBrandDto.Description;
+            if (!string.IsNullOrWhiteSpace(updateBrandDto.Name))
+                brand.Name = updateBrandDto.Name;
+            if (!string.IsNullOrWhiteSpace(updateBrandDto.Description))
+                brand.Description = updateBrandDto.Description;
 
             await _brandRepository.UpdateAsync(brand);
             return MapToDto(brand);
@@ -77,10 +79,6 @@ namespace TuningStore.Services
 
             await _brandRepository.DeleteAsync(id);
             return true;
-        }
-        public async Task<IEnumerable<Model>> GetAllModelsAsync(int id)
-        {
-            return await _brandRepository.GetAllModelsAsync(id);
         }
         private BrandDto MapToDto(Brand brand) => new BrandDto
         {

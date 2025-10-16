@@ -48,23 +48,37 @@ namespace TuningStore.Repositories
 
         public async Task<Part?> UpdateAsync(Part part)
         {
-            var existingPart = await _context.Parts.FindAsync(part.Id);
+            var existingPart = await _parts.FindAsync(part.Id);
             if (existingPart == null)
                 return null;
 
-            existingPart.Name = part.Name;
-            existingPart.Price = part.Price;
-            existingPart.Quantity = part.Quantity;
-            existingPart.ImagePath = part.ImagePath;
-            existingPart.CarSpecificationId = part.CarSpecificationId;
-            existingPart.Color = part.Color;
-            existingPart.PartCategoryId = part.PartCategoryId;
-            existingPart.IsViewed = part.IsViewed;
+            if (!string.IsNullOrWhiteSpace(part.Name))
+                existingPart.Name = part.Name;
+
+            if (part.Price.HasValue)
+                existingPart.Price = part.Price;
+
+            if (part.Quantity.HasValue)
+                existingPart.Quantity = part.Quantity;
+
+            if (!string.IsNullOrWhiteSpace(part.ImagePath))
+                existingPart.ImagePath = part.ImagePath;
+
+            if (part.CarSpecificationId.HasValue)
+                existingPart.CarSpecificationId = part.CarSpecificationId;
+
+            if (!string.IsNullOrWhiteSpace(part.Color))
+                existingPart.Color = part.Color;
+
+            if (part.PartCategoryId != null)
+                existingPart.PartCategoryId = part.PartCategoryId;
+
             existingPart.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return existingPart;
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {

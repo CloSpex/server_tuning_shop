@@ -65,27 +65,36 @@ namespace TuningStore.Services
             if (part == null)
                 return null;
 
-            if (part.PartCategoryId != dto.PartCategoryId)
+            if (dto.PartCategoryId != 0 && part.PartCategoryId != dto.PartCategoryId)
             {
-                if (!await _partRepository.CategoryExistsAsync(dto.PartCategoryId))
+                if (!await _partRepository.CategoryExistsAsync((int)dto.PartCategoryId))
                     throw new InvalidOperationException($"Category with ID {dto.PartCategoryId} does not exist.");
+                part.PartCategoryId = (int)dto.PartCategoryId;
             }
 
-            if (part.CarSpecificationId != dto.CarSpecificationId)
+            if (dto.CarSpecificationId != 0 && part.CarSpecificationId != dto.CarSpecificationId)
             {
-                if (!await _partRepository.SpecificationExistsAsync(dto.CarSpecificationId))
+                if (!await _partRepository.SpecificationExistsAsync((int)dto.CarSpecificationId))
                     throw new InvalidOperationException($"Specification with ID {dto.CarSpecificationId} does not exist.");
+                part.CarSpecificationId = dto.CarSpecificationId;
             }
 
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                part.Name = dto.Name;
 
-            part.Name = dto.Name;
-            part.Price = dto.Price;
-            part.PartCategoryId = dto.PartCategoryId;
-            part.CarSpecificationId = dto.CarSpecificationId;
-            part.Quantity = dto.Quantity;
-            part.ImagePath = dto.ImagePath;
-            part.Color = dto.Color;
+            if (dto.Price.HasValue)
+                part.Price = dto.Price.Value;
 
+            if (dto.Quantity.HasValue)
+                part.Quantity = dto.Quantity.Value;
+
+            if (!string.IsNullOrWhiteSpace(dto.ImagePath))
+                part.ImagePath = dto.ImagePath;
+
+            if (!string.IsNullOrWhiteSpace(dto.Color))
+                part.Color = dto.Color;
+
+            part.UpdatedAt = DateTime.UtcNow;
             await _partRepository.UpdateAsync(part);
             return MapToDto(part);
         }

@@ -64,7 +64,7 @@ namespace TuningStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<SpecificationDto>> UpdateSpecification(
             int id,
             [FromBody] UpdateSpecificationDto updateSpecificationDto)

@@ -79,16 +79,22 @@ namespace TuningStore.Services
             }
 
             var userId = GetCurrentUserId();
-
-            specification.ModelId = dto.ModelId;
-            specification.EngineTypeId = dto.EngineTypeId;
-            specification.TransmissionTypeId = dto.TransmissionTypeId;
-            specification.BodyTypeId = dto.BodyTypeId;
-            specification.VolumeLitres = dto.VolumeLitres;
-            specification.PowerKilowatts = dto.PowerKilowatts;
-            specification.YearStart = dto.YearStart;
-            specification.YearEnd = dto.YearEnd;
-            specification.UpdatedBy = userId;
+            if (specification.EngineTypeId != null && specification.EngineTypeId != dto.EngineTypeId)
+                specification.EngineTypeId = dto.EngineTypeId;
+            if (specification.TransmissionTypeId != null && specification.TransmissionTypeId != dto.TransmissionTypeId)
+                specification.TransmissionTypeId = dto.TransmissionTypeId;
+            if (specification.BodyTypeId != null && specification.BodyTypeId != dto.BodyTypeId)
+                specification.BodyTypeId = dto.BodyTypeId;
+            if (specification.VolumeLitres != null && specification.VolumeLitres != dto.VolumeLitres)
+                specification.VolumeLitres = dto.VolumeLitres;
+            if (specification.PowerKilowatts != null && specification.PowerKilowatts != dto.PowerKilowatts)
+                specification.PowerKilowatts = dto.PowerKilowatts;
+            if (specification.YearStart != null && specification.YearStart != dto.YearStart)
+                specification.YearStart = dto.YearStart;
+            if (specification.YearEnd != null && specification.YearEnd != dto.YearEnd)
+                specification.YearEnd = dto.YearEnd;
+            if (specification.UpdatedBy != null && specification.UpdatedBy != userId)
+                specification.UpdatedBy = userId;
 
             await _specificationRepository.UpdateAsync(specification);
 

@@ -68,7 +68,7 @@ namespace TuningStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<PartDto>> UpdatePart(int id, [FromBody] UpdatePartDto updatePartDto)
         {
             if (!ModelState.IsValid)

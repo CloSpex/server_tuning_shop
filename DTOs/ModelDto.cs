@@ -2,16 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TuningStore.DTOs
 {
-    public class ModelDto
+    public class ModelDto : BaseCreatorDto
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public int? CreatedBy { get; set; }
-        public int? UpdatedBy { get; set; }
         public int BrandId { get; set; }
-        public List<SpecificationDto> Specifications { get; set; } = new();
     }
 
     public class CreateModelDto
