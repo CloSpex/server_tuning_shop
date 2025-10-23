@@ -12,17 +12,17 @@ namespace TuningStore.Models
         public int ModelId { get; set; }
 
         [Column("engine_id")]
-        public int? EngineTypeId { get; set; }
+        public int EngineTypeId { get; set; }
         [ForeignKey("EngineTypeId")]
         public EngineType EngineType { get; set; }
 
         [Column("transmission_id")]
-        public int? TransmissionTypeId { get; set; }
+        public int TransmissionTypeId { get; set; }
         [ForeignKey("TransmissionTypeId")]
         public TransmissionType TransmissionType { get; set; }
 
         [Column("body_id")]
-        public int? BodyTypeId { get; set; }
+        public int BodyTypeId { get; set; }
         [ForeignKey("BodyTypeId")]
         public BodyType BodyType { get; set; }
 

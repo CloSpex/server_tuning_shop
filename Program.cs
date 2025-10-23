@@ -99,6 +99,8 @@ builder.Services.AddScoped<ISpecificationRepository, SpecificationRepository>();
 builder.Services.AddScoped<ISpecificationService, SpecificationService>();
 builder.Services.AddScoped<IPartRepository, PartRepository>();
 builder.Services.AddScoped<IPartService, PartService>();
+builder.Services.AddScoped<IFaqRepository, FaqRepository>();
+builder.Services.AddScoped<IFaqService, FaqService>();
 builder.Services.AddOpenApi();
 
 builder.WebHost.UseUrls("http://localhost:5099");

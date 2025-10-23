@@ -64,13 +64,13 @@ namespace TuningStore.Repositories
             if (!string.IsNullOrWhiteSpace(part.ImagePath))
                 existingPart.ImagePath = part.ImagePath;
 
-            if (part.CarSpecificationId.HasValue)
+            if (part.CarSpecificationId != existingPart.CarSpecificationId)
                 existingPart.CarSpecificationId = part.CarSpecificationId;
 
             if (!string.IsNullOrWhiteSpace(part.Color))
                 existingPart.Color = part.Color;
 
-            if (part.PartCategoryId != null)
+            if (part.PartCategoryId != existingPart.PartCategoryId)
                 existingPart.PartCategoryId = part.PartCategoryId;
 
             existingPart.UpdatedAt = DateTime.UtcNow;

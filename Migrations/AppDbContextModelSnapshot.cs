@@ -79,9 +79,6 @@ namespace server.Migrations
 
                     b.HasIndex("CreatedBy");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("UpdatedBy");
 
                     b.ToTable("Brands");
@@ -187,12 +184,7 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CreatedBy");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("UpdatedBy");
 
@@ -208,7 +200,7 @@ namespace server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CarSpecificationId")
+                    b.Property<int>("CarSpecificationId")
                         .HasColumnType("int")
                         .HasColumnName("car_specification_id");
 
@@ -227,6 +219,7 @@ namespace server.Migrations
                         .HasColumnName("created_by");
 
                     b.Property<string>("ImagePath")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("image_path");
@@ -271,10 +264,6 @@ namespace server.Migrations
 
                     b.HasIndex("UpdatedBy");
 
-                    b.HasIndex("Name", "CarSpecificationId", "Color")
-                        .IsUnique()
-                        .HasFilter("[car_specification_id] IS NOT NULL");
-
                     b.ToTable("Parts");
                 });
 
@@ -311,7 +300,7 @@ namespace server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BodyTypeId")
+                    b.Property<int>("BodyTypeId")
                         .HasColumnType("int")
                         .HasColumnName("body_id");
 
@@ -323,7 +312,7 @@ namespace server.Migrations
                         .HasColumnType("int")
                         .HasColumnName("created_by");
 
-                    b.Property<int?>("EngineTypeId")
+                    b.Property<int>("EngineTypeId")
                         .HasColumnType("int")
                         .HasColumnName("engine_id");
 
@@ -335,7 +324,7 @@ namespace server.Migrations
                         .HasColumnType("float")
                         .HasColumnName("power_kilowatts");
 
-                    b.Property<int?>("TransmissionTypeId")
+                    b.Property<int>("TransmissionTypeId")
                         .HasColumnType("int")
                         .HasColumnName("transmission_id");
 
@@ -436,12 +425,6 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
                     b.ToTable("Users");
                 });
 
@@ -477,12 +460,6 @@ namespace server.Migrations
 
             modelBuilder.Entity("TuningStore.Models.Model", b =>
                 {
-                    b.HasOne("TuningStore.Models.Brand", "Brand")
-                        .WithMany("Models")
-                        .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("TuningStore.Models.User", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatedBy");
@@ -490,8 +467,6 @@ namespace server.Migrations
                     b.HasOne("TuningStore.Models.User", "Updater")
                         .WithMany()
                         .HasForeignKey("UpdatedBy");
-
-                    b.Navigation("Brand");
 
                     b.Navigation("Creator");
 
@@ -502,7 +477,9 @@ namespace server.Migrations
                 {
                     b.HasOne("TuningStore.Models.Specification", "CarSpecification")
                         .WithMany()
-                        .HasForeignKey("CarSpecificationId");
+                        .HasForeignKey("CarSpecificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TuningStore.Models.User", "Creator")
                         .WithMany()
@@ -531,7 +508,9 @@ namespace server.Migrations
                 {
                     b.HasOne("TuningStore.Models.BodyType", "BodyType")
                         .WithMany("Specifications")
-                        .HasForeignKey("BodyTypeId");
+                        .HasForeignKey("BodyTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TuningStore.Models.User", "Creator")
                         .WithMany()
@@ -539,17 +518,21 @@ namespace server.Migrations
 
                     b.HasOne("TuningStore.Models.EngineType", "EngineType")
                         .WithMany("Specifications")
-                        .HasForeignKey("EngineTypeId");
+                        .HasForeignKey("EngineTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TuningStore.Models.Model", "Model")
                         .WithMany("Specifications")
                         .HasForeignKey("ModelId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TuningStore.Models.TransmissionType", "TransmissionType")
                         .WithMany("Specifications")
-                        .HasForeignKey("TransmissionTypeId");
+                        .HasForeignKey("TransmissionTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TuningStore.Models.User", "Updater")
                         .WithMany()
@@ -571,11 +554,6 @@ namespace server.Migrations
             modelBuilder.Entity("TuningStore.Models.BodyType", b =>
                 {
                     b.Navigation("Specifications");
-                });
-
-            modelBuilder.Entity("TuningStore.Models.Brand", b =>
-                {
-                    b.Navigation("Models");
                 });
 
             modelBuilder.Entity("TuningStore.Models.EngineType", b =>

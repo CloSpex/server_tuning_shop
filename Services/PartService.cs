@@ -43,8 +43,6 @@ namespace TuningStore.Services
             if (!await _partRepository.SpecificationExistsAsync(dto.CarSpecificationId))
                 throw new InvalidOperationException($"Specification with ID {dto.CarSpecificationId} does not exist.");
 
-
-
             var part = new Part
             {
                 Name = dto.Name,

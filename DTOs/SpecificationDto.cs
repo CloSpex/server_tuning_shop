@@ -13,9 +13,9 @@ namespace TuningStore.DTOs
         public int? YearStart { get; set; }
         public int? YearEnd { get; set; }
 
-        public EngineTypeDto? EngineType { get; set; }
-        public TransmissionTypeDto? TransmissionType { get; set; }
-        public BodyTypeDto? BodyType { get; set; }
+        public EngineTypeDto EngineType { get; set; }
+        public TransmissionTypeDto TransmissionType { get; set; }
+        public BodyTypeDto BodyType { get; set; }
     }
 
 
@@ -25,11 +25,11 @@ namespace TuningStore.DTOs
         [Required(ErrorMessage = "Model ID is required")]
         public int ModelId { get; set; }
 
-        public int? EngineTypeId { get; set; }
+        public int EngineTypeId { get; set; }
 
-        public int? TransmissionTypeId { get; set; }
+        public int TransmissionTypeId { get; set; }
 
-        public int? BodyTypeId { get; set; }
+        public int BodyTypeId { get; set; }
 
         [Range(0.1, 20.0, ErrorMessage = "Volume must be between 0.1 and 20.0 litres")]
         public double? VolumeLitres { get; set; }
@@ -49,11 +49,11 @@ namespace TuningStore.DTOs
         [Required(ErrorMessage = "Model ID is required")]
         public int ModelId { get; set; }
 
-        public int? EngineTypeId { get; set; }
+        public int EngineTypeId { get; set; }
 
-        public int? TransmissionTypeId { get; set; }
+        public int TransmissionTypeId { get; set; }
 
-        public int? BodyTypeId { get; set; }
+        public int BodyTypeId { get; set; }
 
         [Range(0.1, 20.0, ErrorMessage = "Volume must be between 0.1 and 20.0 litres")]
         public double? VolumeLitres { get; set; }

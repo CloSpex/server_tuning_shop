@@ -79,11 +79,11 @@ namespace TuningStore.Services
             }
 
             var userId = GetCurrentUserId();
-            if (specification.EngineTypeId != null && specification.EngineTypeId != dto.EngineTypeId)
+            if (specification.EngineTypeId != dto.EngineTypeId)
                 specification.EngineTypeId = dto.EngineTypeId;
-            if (specification.TransmissionTypeId != null && specification.TransmissionTypeId != dto.TransmissionTypeId)
+            if (specification.TransmissionTypeId != dto.TransmissionTypeId)
                 specification.TransmissionTypeId = dto.TransmissionTypeId;
-            if (specification.BodyTypeId != null && specification.BodyTypeId != dto.BodyTypeId)
+            if (specification.BodyTypeId != dto.BodyTypeId)
                 specification.BodyTypeId = dto.BodyTypeId;
             if (specification.VolumeLitres != null && specification.VolumeLitres != dto.VolumeLitres)
                 specification.VolumeLitres = dto.VolumeLitres;
@@ -141,21 +141,21 @@ namespace TuningStore.Services
                 UpdatedAt = spec.UpdatedAt,
                 CreatedBy = spec.CreatedBy,
                 UpdatedBy = spec.UpdatedBy,
-                EngineType = spec.EngineType != null ? new EngineTypeDto
+                EngineType = new EngineTypeDto
                 {
                     Id = spec.EngineType.Id,
                     Name = spec.EngineType.Name
-                } : null,
-                TransmissionType = spec.TransmissionType != null ? new TransmissionTypeDto
+                },
+                TransmissionType = new TransmissionTypeDto
                 {
                     Id = spec.TransmissionType.Id,
                     Name = spec.TransmissionType.Name
-                } : null,
-                BodyType = spec.BodyType != null ? new BodyTypeDto
+                },
+                BodyType = new BodyTypeDto
                 {
                     Id = spec.BodyType.Id,
                     Name = spec.BodyType.Name
-                } : null
+                }
             };
         }
     }

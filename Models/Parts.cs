@@ -22,21 +22,21 @@ namespace TuningStore.Models
         public string ImagePath { get; set; } = "images/default_part_image.jpg";
 
         [Column("car_specification_id")]
-        public int? CarSpecificationId { get; set; }
+        public int CarSpecificationId { get; set; }
 
         [Column("color")]
         [StringLength(7)]
         public string Color { get; set; } = "#d3d3d3";
 
         [Column("part_category_id")]
-        public int? PartCategoryId { get; set; }
+        public int PartCategoryId { get; set; }
 
         [Column("is_viewed")]
         public bool IsViewed { get; set; } = false;
 
 
         [ForeignKey(nameof(CarSpecificationId))]
-        public Specification? CarSpecification { get; set; }
+        public Specification CarSpecification { get; set; }
 
         [ForeignKey(nameof(PartCategoryId))]
         public PartCategory PartCategory { get; set; } = null!;

@@ -8,8 +8,8 @@ namespace TuningStore.DTOs
         public decimal? Price { get; set; }
         public int? Quantity { get; set; }
         public string ImagePath { get; set; } = "images/default_part_image.jpg";
-        public int? CarSpecificationId { get; set; }
-        public int? PartCategoryId { get; set; }
+        public int CarSpecificationId { get; set; }
+        public int PartCategoryId { get; set; }
     }
 
     public class CreatePartDto
@@ -43,8 +43,8 @@ namespace TuningStore.DTOs
 
         public string? ImagePath { get; set; }
 
-        public int? PartCategoryId { get; set; }
+        public int PartCategoryId { get; set; }
         public string? Color { get; set; } = "#d3d3d3";
-        public int? CarSpecificationId { get; set; }
+        public int CarSpecificationId { get; set; }
     }
 }

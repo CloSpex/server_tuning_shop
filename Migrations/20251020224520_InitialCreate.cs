@@ -155,12 +155,6 @@ namespace server.Migrations
                 {
                     table.PrimaryKey("PK_Models", x => x.id);
                     table.ForeignKey(
-                        name: "FK_Models_Brands_brand_id",
-                        column: x => x.brand_id,
-                        principalTable: "Brands",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_Models_Users_created_by",
                         column: x => x.created_by,
                         principalTable: "Users",
@@ -179,9 +173,9 @@ namespace server.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     model_id = table.Column<int>(type: "int", nullable: false),
-                    engine_id = table.Column<int>(type: "int", nullable: true),
-                    transmission_id = table.Column<int>(type: "int", nullable: true),
-                    body_id = table.Column<int>(type: "int", nullable: true),
+                    engine_id = table.Column<int>(type: "int", nullable: false),
+                    transmission_id = table.Column<int>(type: "int", nullable: false),
+                    body_id = table.Column<int>(type: "int", nullable: false),
                     volume_litres = table.Column<double>(type: "float", nullable: true),
                     power_kilowatts = table.Column<double>(type: "float", nullable: true),
                     year_start = table.Column<int>(type: "int", nullable: true),
@@ -198,23 +192,26 @@ namespace server.Migrations
                         name: "FK_Specifications_BodyTypes_body_id",
                         column: x => x.body_id,
                         principalTable: "BodyTypes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Specifications_EngineTypes_engine_id",
                         column: x => x.engine_id,
                         principalTable: "EngineTypes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Specifications_Models_model_id",
                         column: x => x.model_id,
                         principalTable: "Models",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Specifications_TransmissionTypes_transmission_id",
                         column: x => x.transmission_id,
                         principalTable: "TransmissionTypes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Specifications_Users_created_by",
                         column: x => x.created_by,
@@ -236,8 +233,8 @@ namespace server.Migrations
                     name = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     price = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
                     quantity = table.Column<int>(type: "int", nullable: true),
-                    image_path = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    car_specification_id = table.Column<int>(type: "int", nullable: true),
+                    image_path = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    car_specification_id = table.Column<int>(type: "int", nullable: false),
                     color = table.Column<string>(type: "nvarchar(7)", maxLength: 7, nullable: false),
                     part_category_id = table.Column<int>(type: "int", nullable: false),
                     is_viewed = table.Column<bool>(type: "bit", nullable: false),
@@ -259,7 +256,8 @@ namespace server.Migrations
                         name: "FK_Parts_Specifications_car_specification_id",
                         column: x => x.car_specification_id,
                         principalTable: "Specifications",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Parts_Users_created_by",
                         column: x => x.created_by,
@@ -278,12 +276,6 @@ namespace server.Migrations
                 column: "created_by");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Brands_name",
-                table: "Brands",
-                column: "name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Brands_updated_by",
                 table: "Brands",
                 column: "updated_by");
@@ -299,20 +291,9 @@ namespace server.Migrations
                 column: "updated_by");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Models_brand_id",
-                table: "Models",
-                column: "brand_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Models_created_by",
                 table: "Models",
                 column: "created_by");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Models_name",
-                table: "Models",
-                column: "name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Models_updated_by",
@@ -328,13 +309,6 @@ namespace server.Migrations
                 name: "IX_Parts_created_by",
                 table: "Parts",
                 column: "created_by");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Parts_name_car_specification_id_color",
-                table: "Parts",
-                columns: new[] { "name", "car_specification_id", "color" },
-                unique: true,
-                filter: "[car_specification_id] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Parts_part_category_id",
@@ -375,23 +349,14 @@ namespace server.Migrations
                 name: "IX_Specifications_updated_by",
                 table: "Specifications",
                 column: "updated_by");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_email",
-                table: "Users",
-                column: "email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_username",
-                table: "Users",
-                column: "username",
-                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Brands");
+
             migrationBuilder.DropTable(
                 name: "FAQs");
 
@@ -415,9 +380,6 @@ namespace server.Migrations
 
             migrationBuilder.DropTable(
                 name: "TransmissionTypes");
-
-            migrationBuilder.DropTable(
-                name: "Brands");
 
             migrationBuilder.DropTable(
                 name: "Users");

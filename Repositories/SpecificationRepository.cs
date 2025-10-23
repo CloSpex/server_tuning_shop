@@ -81,11 +81,11 @@ namespace TuningStore.Repositories
                 existingSpecification.YearStart = specification.YearStart;
             if (specification.YearEnd != null)
                 existingSpecification.YearEnd = specification.YearEnd;
-            if (specification.EngineTypeId != null)
+            if (specification.EngineTypeId != existingSpecification.EngineTypeId)
                 existingSpecification.EngineTypeId = specification.EngineTypeId;
-            if (specification.TransmissionTypeId != null)
+            if (specification.TransmissionTypeId != existingSpecification.TransmissionTypeId)
                 existingSpecification.TransmissionTypeId = specification.TransmissionTypeId;
-            if (specification.BodyTypeId != null)
+            if (specification.BodyTypeId != existingSpecification.BodyTypeId)
                 existingSpecification.BodyTypeId = specification.BodyTypeId;
             specification.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
