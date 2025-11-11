@@ -143,7 +143,6 @@ builder.Services.AddOpenApi(options =>
     });
 });
 
-builder.WebHost.UseUrls("http://localhost:5099");
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
