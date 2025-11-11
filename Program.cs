@@ -12,6 +12,7 @@ using TuningStore.Authorization.Requirements;
 using TuningStore.Authorization.Policies;
 using System.Text;
 using Scalar.AspNetCore;
+using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -101,14 +102,59 @@ builder.Services.AddScoped<IPartRepository, PartRepository>();
 builder.Services.AddScoped<IPartService, PartService>();
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
 builder.Services.AddScoped<IFaqService, FaqService>();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info = new()
+        {
+            Title = "TuningStore API",
+            Version = "v1",
+            Description = "API for car tuning parts management system"
+        };
+
+        document.Components ??= new();
+        document.Components.SecuritySchemes = new Dictionary<string, OpenApiSecurityScheme>
+        {
+            ["Bearer"] = new()
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
+            }
+        };
+
+        document.SecurityRequirements = new List<OpenApiSecurityRequirement>
+        {
+            new()
+            {
+                [new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                }] = Array.Empty<string>()
+            }
+        };
+
+        return Task.CompletedTask;
+    });
+});
 
 builder.WebHost.UseUrls("http://localhost:5099");
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("TuningStore API")
+            .WithTheme(ScalarTheme.Purple)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
 }
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");

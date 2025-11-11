@@ -17,6 +17,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ActionResult<object>> Login([FromBody] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
@@ -52,13 +53,20 @@ namespace TuningStore.Controllers
         }
 
         [HttpPost("refresh")]
+        [AllowAnonymous]
         public async Task<ActionResult> RefreshToken()
         {
             try
             {
                 var refreshToken = Request.Cookies["refreshToken"];
+
+                if (!string.IsNullOrEmpty(refreshToken))
+                {
+                    refreshToken = Uri.UnescapeDataString(refreshToken);
+                }
+
                 if (string.IsNullOrEmpty(refreshToken))
-                    return Unauthorized("No refresh token provided.");
+                    return Unauthorized(new { error = "No refresh token provided." });
 
                 var authHeader = Request.Headers["Authorization"].FirstOrDefault();
                 var accessToken = string.Empty;
@@ -69,20 +77,11 @@ namespace TuningStore.Controllers
                 }
 
                 if (string.IsNullOrEmpty(accessToken))
-                    return Unauthorized("No access token provided.");
+                    return Unauthorized(new { error = "No access token provided." });
 
                 var result = await _userService.RefreshTokenAsync(accessToken, refreshToken);
                 if (result == null)
-                    return Unauthorized("Invalid token.");
-
-                Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = false,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(7),
-                    Path = "/"
-                });
+                    return Unauthorized(new { error = "Invalid or expired token. Please login again." });
 
                 return Ok(new
                 {
@@ -91,13 +90,14 @@ namespace TuningStore.Controllers
                     message = "Token refreshed successfully"
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while refreshing the token.");
+                return StatusCode(500, new { error = "An error occurred while refreshing the token.", details = ex.Message });
             }
         }
 
         [HttpPost("logout")]
+        [Authorize]
         public async Task<ActionResult> Logout()
         {
             try

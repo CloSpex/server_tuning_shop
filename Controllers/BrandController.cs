@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TuningStore.Authorization.Policies;
 using TuningStore.DTOs;
 using TuningStore.Services;
 
@@ -7,6 +9,7 @@ namespace TuningStore.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BrandController : ControllerBase
     {
         private readonly IBrandService _brandService;
@@ -17,6 +20,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetBrands()
         {
             var brands = await _brandService.GetAllBrandsAsync();
@@ -24,6 +28,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<BrandDto>> GetBrand(int id)
         {
             var brand = await _brandService.GetBrandByIdAsync(id);
@@ -35,6 +40,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult<BrandDto>> CreateBrand([FromBody] CreateBrandDto createBrandDto)
         {
             if (!ModelState.IsValid)
@@ -56,6 +62,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult<BrandDto>> UpdateBrand(int id, [FromBody] UpdateBrandDto updateBrandDto)
         {
             if (!ModelState.IsValid)
@@ -80,6 +87,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<IActionResult> DeleteBrand(int id)
         {
             try

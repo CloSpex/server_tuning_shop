@@ -81,7 +81,8 @@ namespace TuningStore.Services
                 ValidIssuer = _configuration["Jwt:Issuer"],
                 ValidAudience = _configuration["Jwt:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(_key),
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                RequireExpirationTime = true
             };
 
             try
@@ -89,14 +90,18 @@ namespace TuningStore.Services
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
 
                 if (validatedToken is not JwtSecurityToken jwtToken ||
-                    !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256Signature, StringComparison.InvariantCultureIgnoreCase))
+                    !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
                     return null;
                 }
 
                 return principal;
             }
-            catch
+            catch (SecurityTokenException)
+            {
+                return null;
+            }
+            catch (Exception)
             {
                 return null;
             }

@@ -50,21 +50,29 @@ namespace TuningStore.Services
             return MapToDto(faq);
         }
 
+
         public async Task<FAQDto?> UpdateFaqAsync(int id, UpdateFAQDto updateFaqDto)
         {
             var faq = await _faqRepository.GetByIdAsync(id);
             if (faq == null)
                 return null;
+
             if (!string.IsNullOrWhiteSpace(updateFaqDto.Question) &&
                 updateFaqDto.Question != faq.Question &&
                 await _faqRepository.QuestionExistsAsync(updateFaqDto.Question))
             {
                 throw new InvalidOperationException("FAQ with the same question already exists.");
             }
+
+            if (!string.IsNullOrWhiteSpace(updateFaqDto.Question))
+                faq.Question = updateFaqDto.Question;
+
+            if (!string.IsNullOrWhiteSpace(updateFaqDto.Answer))
+                faq.Answer = updateFaqDto.Answer;
+
             await _faqRepository.UpdateAsync(faq);
             return MapToDto(faq);
         }
-
         public async Task<bool> DeleteFaqAsync(int id)
         {
             var faq = await _faqRepository.GetByIdAsync(id);
@@ -76,6 +84,7 @@ namespace TuningStore.Services
         }
         private FAQDto MapToDto(FAQ faq) => new FAQDto
         {
+            Id = faq.Id,
             Question = faq.Question,
             Answer = faq.Answer
         };

@@ -26,5 +26,6 @@ namespace TuningStore.Models
         [Column("role")]
         [StringLength(50)]
         public string? Role { get; set; } = "User";
+
     }
 }

@@ -39,7 +39,10 @@ namespace TuningStore.Services
             {
                 throw new InvalidOperationException("Model with the same name already exists.");
             }
-
+            if (createModelDto.BrandId == null)
+            {
+                throw new InvalidOperationException("BrandId cannot be null.");
+            }
             var model = new Model
             {
                 Name = createModelDto.Name,
@@ -60,7 +63,10 @@ namespace TuningStore.Services
             {
                 throw new InvalidOperationException("Another model with the same name already exists.");
             }
-
+            if (updateModelDto.BrandId == null)
+            {
+                throw new InvalidOperationException("BrandId cannot be null.");
+            }
             model.Name = updateModelDto.Name;
             if (updateModelDto.BrandId.HasValue)
             {

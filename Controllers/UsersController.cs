@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TuningStore.Authorization.Policies;
 using TuningStore.DTOs;
 using TuningStore.Services;
 
@@ -7,6 +9,7 @@ namespace TuningStore.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -17,6 +20,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
             var users = await _userService.GetAllUsersAsync();
@@ -24,6 +28,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.ResourceOwner)]
         public async Task<ActionResult<UserDto>> GetUser(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -35,6 +40,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
         {
             if (!ModelState.IsValid)
@@ -56,6 +62,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.ResourceOwner)]
         public async Task<ActionResult<UserDto>> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid)
@@ -80,6 +87,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult> DeleteUser(int id)
         {
             try

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TuningStore.Authorization.Policies;
 using TuningStore.DTOs;
 using TuningStore.Services;
 
@@ -7,6 +8,7 @@ namespace TuningStore.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class SpecificationsController : ControllerBase
     {
         private readonly ISpecificationService _specificationService;
@@ -17,12 +19,14 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<SpecificationDto>>> GetSpecifications()
         {
             var specifications = await _specificationService.GetAllSpecificationsAsync();
             return Ok(specifications);
         }
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<SpecificationDto>> GetSpecification(int id)
         {
             var specification = await _specificationService.GetSpecificationByIdAsync(id);
@@ -34,12 +38,14 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet("model/{modelId}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<SpecificationDto>>> GetSpecificationsByModelId(int modelId)
         {
             var specifications = await _specificationService.GetSpecificationsByModelIdAsync(modelId);
             return Ok(specifications);
         }
         [HttpPost]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult<SpecificationDto>> CreateSpecification(
             [FromBody] CreateSpecificationDto createSpecificationDto)
         {
@@ -65,6 +71,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult<SpecificationDto>> UpdateSpecification(
             int id,
             [FromBody] UpdateSpecificationDto updateSpecificationDto)
@@ -92,6 +99,7 @@ namespace TuningStore.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<IActionResult> DeleteSpecification(int id)
         {
             try

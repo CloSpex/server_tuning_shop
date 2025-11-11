@@ -172,14 +172,12 @@ namespace TuningStore.Services
             {
                 return null;
             }
-
-            var newRefreshToken = _jwtService.GenerateRefreshToken();
             var newAccessToken = _jwtService.GenerateAccessToken(user);
 
             return new TokenResponseDto
             {
                 AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken,
+                RefreshToken = refreshToken,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(15)
             };
         }
