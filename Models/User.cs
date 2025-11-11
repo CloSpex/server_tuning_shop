@@ -27,5 +27,6 @@ namespace TuningStore.Models
         [StringLength(50)]
         public string? Role { get; set; } = "User";
 
+        public List<RefreshToken> RefreshTokens { get; set; } = new();
     }
 }

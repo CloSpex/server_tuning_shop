@@ -14,20 +14,28 @@ namespace TuningStore.Services
         Task<UserDto> CreateUserAsync(CreateUserDto createUserDto);
         Task<UserDto?> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
         Task<bool> DeleteUserAsync(int id);
-        Task<LoginResponseDto?> AuthenticateAsync(LoginDto loginDto);
-        Task<TokenResponseDto?> RefreshTokenAsync(string accessToken, string refreshToken);
-        Task<bool> LogoutAsync(string refreshToken);
+        Task<LoginResponseDto?> AuthenticateAsync(LoginDto loginDto, string? ipAddress = null);
+        Task<TokenResponseDto?> RefreshTokenAsync(string accessToken, string refreshToken, string? ipAddress = null);
+        Task<bool> RevokeTokenAsync(string refreshToken, string? ipAddress = null);
     }
 
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IJwtService _jwtService;
+        private readonly IConfiguration _configuration;
 
-        public UserService(IUserRepository userRepository, IJwtService jwtService)
+        public UserService(
+            IUserRepository userRepository,
+            IRefreshTokenRepository refreshTokenRepository,
+            IJwtService jwtService,
+            IConfiguration configuration)
         {
             _userRepository = userRepository;
+            _refreshTokenRepository = refreshTokenRepository;
             _jwtService = jwtService;
+            _configuration = configuration;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
@@ -128,7 +136,7 @@ namespace TuningStore.Services
             return true;
         }
 
-        public async Task<LoginResponseDto?> AuthenticateAsync(LoginDto loginDto)
+        public async Task<LoginResponseDto?> AuthenticateAsync(LoginDto loginDto, string? ipAddress = null)
         {
             var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
@@ -136,55 +144,95 @@ namespace TuningStore.Services
                 return null;
             }
 
-            var refreshToken = _jwtService.GenerateRefreshToken();
             var accessToken = _jwtService.GenerateAccessToken(user);
+            var refreshToken = new RefreshToken
+            {
+                Token = _jwtService.GenerateRefreshToken(),
+                UserId = user.Id,
+                ExpiresAt = DateTime.UtcNow.AddDays(double.Parse(_configuration["Jwt:RefreshTokenExpirationDays"]!)),
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = ipAddress
+            };
+
+            await _refreshTokenRepository.AddAsync(refreshToken);
+
+            await _refreshTokenRepository.RemoveOldTokensAsync(user.Id);
 
             return new LoginResponseDto
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                RefreshToken = refreshToken.Token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:AccessTokenExpirationMinutes"]!)),
                 User = MapToDto(user)
             };
         }
 
-        public async Task<TokenResponseDto?> RefreshTokenAsync(string accessToken, string refreshToken)
+        public async Task<TokenResponseDto?> RefreshTokenAsync(string accessToken, string refreshTokenString, string? ipAddress = null)
         {
-            if (!_jwtService.ValidateRefreshToken(refreshToken))
+            var refreshToken = await _refreshTokenRepository.GetByTokenAsync(refreshTokenString);
+
+            if (refreshToken == null)
+                return null;
+
+            if (refreshToken.IsRevoked)
             {
+                await _refreshTokenRepository.RevokeDescendantTokensAsync(refreshToken, ipAddress);
                 return null;
             }
+
+            if (!refreshToken.IsActive)
+                return null;
 
             var principal = _jwtService.GetPrincipalFromToken(accessToken, validateLifetime: false);
             if (principal == null)
-            {
                 return null;
-            }
 
             var userIdClaim = principal.FindFirst("id") ?? principal.FindFirst("sub");
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-            {
                 return null;
-            }
+
+            if (refreshToken.UserId != userId)
+                return null;
 
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
-            {
                 return null;
-            }
+
+            var newRefreshToken = new RefreshToken
+            {
+                Token = _jwtService.GenerateRefreshToken(),
+                UserId = user.Id,
+                ExpiresAt = refreshToken.ExpiresAt,
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = ipAddress
+            };
+
+            refreshToken.RevokedAt = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.ReplacedByToken = newRefreshToken.Token;
+
+            await _refreshTokenRepository.UpdateAsync(refreshToken);
+            await _refreshTokenRepository.AddAsync(newRefreshToken);
+
             var newAccessToken = _jwtService.GenerateAccessToken(user);
 
             return new TokenResponseDto
             {
                 AccessToken = newAccessToken,
-                RefreshToken = refreshToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+                RefreshToken = newRefreshToken.Token,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:AccessTokenExpirationMinutes"]!))
             };
         }
 
-        public Task<bool> LogoutAsync(string refreshToken)
+        public async Task<bool> RevokeTokenAsync(string refreshTokenString, string? ipAddress = null)
         {
-            return Task.FromResult(_jwtService.ValidateRefreshToken(refreshToken));
+            var refreshToken = await _refreshTokenRepository.GetByTokenAsync(refreshTokenString);
+
+            if (refreshToken == null || !refreshToken.IsActive)
+                return false;
+
+            await _refreshTokenRepository.RevokeAsync(refreshToken, ipAddress);
+            return true;
         }
 
         private static UserDto MapToDto(User user)

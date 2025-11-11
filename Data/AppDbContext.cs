@@ -20,6 +20,7 @@ namespace TuningStore.Data
         public DbSet<PartCategory> PartCategories => Set<PartCategory>();
         public DbSet<FAQ> FAQs => Set<FAQ>();
 
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

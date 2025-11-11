@@ -32,7 +32,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowCredentials());
 });
-
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -88,6 +87,7 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("User", "Admin"));
 });
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOwnerHandler>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -144,17 +144,16 @@ builder.Services.AddOpenApi(options =>
 });
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
+
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options
-            .WithTitle("TuningStore API")
-            .WithTheme(ScalarTheme.Purple)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
-}
+    options
+        .WithTitle("TuningStore API")
+        .WithTheme(ScalarTheme.Purple)
+        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+});
+
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.UseMiddleware<ErrorHandlingMiddleware>();

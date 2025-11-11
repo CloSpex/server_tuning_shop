@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+env:
+  AZURE_WEBAPP_NAME: tuningstore-api
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+  Jwt__SecretKey: ${{ secrets.JWT_SECRET }}
+  Jwt__Issuer: ${{ secrets.JWT_ISSUER }}
+  Jwt__Audience: ${{ secrets.JWT_AUDIENCE }}
+  Jwt__AccessTokenExpirationMinutes: ${{secrets.JWT_ACCESSTOKENEXPIRATIONMINUTES}}
+  Jwt__RefreshTokenExpirationDays: ${{secrets.JWT_REFRESHTOKENEXPIRATIONDAYS}}
+  ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "9.0.x"
+      - name: Restore
+        run: dotnet restore ./server_tuning_shop.sln
+
+      - name: Build
+        run: dotnet build ./server_tuning_shop.sln --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ./server_tuning_shop.sln --configuration Release --no-build --output '${{env.AZURE_WEBAPP_PACKAGE_PATH}}'
+      - name: Deployment
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{env.AZURE_WEBAPP_NAME}}
+          publish-profile: ${{secrets.AZURE_WEBAPP_PUBLISH_PROFILE}}
+          package: "${{env.AZURE_WEBAPP_PACKAGE_PATH}}"

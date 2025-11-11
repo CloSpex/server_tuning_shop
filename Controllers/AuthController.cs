@@ -10,10 +10,12 @@ namespace TuningStore.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -25,18 +27,13 @@ namespace TuningStore.Controllers
 
             try
             {
-                var result = await _userService.AuthenticateAsync(loginDto);
-                if (result == null)
-                    return Unauthorized("Invalid username or password.");
+                var ipAddress = GetIpAddress();
+                var result = await _userService.AuthenticateAsync(loginDto, ipAddress);
 
-                Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = false,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddDays(7),
-                    Path = "/"
-                });
+                if (result == null)
+                    return Unauthorized(new { error = "Invalid username or password." });
+
+                SetRefreshTokenCookie(result.RefreshToken);
 
                 return Ok(new
                 {
@@ -46,9 +43,9 @@ namespace TuningStore.Controllers
                     message = "Login successful"
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred during authentication.");
+                return StatusCode(500, new { error = "An error occurred during authentication.", details = ex.Message });
             }
         }
 
@@ -79,9 +76,13 @@ namespace TuningStore.Controllers
                 if (string.IsNullOrEmpty(accessToken))
                     return Unauthorized(new { error = "No access token provided." });
 
-                var result = await _userService.RefreshTokenAsync(accessToken, refreshToken);
+                var ipAddress = GetIpAddress();
+                var result = await _userService.RefreshTokenAsync(accessToken, refreshToken, ipAddress);
+
                 if (result == null)
                     return Unauthorized(new { error = "Invalid or expired token. Please login again." });
+
+                SetRefreshTokenCookie(result.RefreshToken);
 
                 return Ok(new
                 {
@@ -103,24 +104,26 @@ namespace TuningStore.Controllers
             try
             {
                 var refreshToken = Request.Cookies["refreshToken"];
+
                 if (!string.IsNullOrEmpty(refreshToken))
                 {
-                    await _userService.LogoutAsync(refreshToken);
+                    var ipAddress = GetIpAddress();
+                    await _userService.RevokeTokenAsync(refreshToken, ipAddress);
                 }
 
                 Response.Cookies.Delete("refreshToken", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
                     SameSite = SameSiteMode.Strict,
                     Path = "/"
                 });
 
                 return Ok(new { message = "Logged out successfully." });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred during logout.");
+                return StatusCode(500, new { error = "An error occurred during logout.", details = ex.Message });
             }
         }
 
@@ -140,10 +143,34 @@ namespace TuningStore.Controllers
 
                 return Ok(new { user });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while fetching user data.");
+                return StatusCode(500, new { error = "An error occurred while fetching user data.", details = ex.Message });
             }
+        }
+
+        private void SetRefreshTokenCookie(string refreshToken)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(double.Parse(_configuration["Jwt:RefreshTokenExpirationDays"]!)),
+                Path = "/"
+            };
+
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+
+        private string? GetIpAddress()
+        {
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+            {
+                return Request.Headers["X-Forwarded-For"].ToString().Split(',')[0].Trim();
+            }
+
+            return HttpContext.Connection.RemoteIpAddress?.ToString();
         }
     }
 }
