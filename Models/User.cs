@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TuningStore.Models
 {
     [Table("Users")]
-    public class User : BaseModel
+    public class User : BaseCreatorModel
     {
 
         [Required]
@@ -28,5 +28,6 @@ namespace TuningStore.Models
         public string? Role { get; set; } = "User";
 
         public List<RefreshToken> RefreshTokens { get; set; } = new();
+
     }
 }

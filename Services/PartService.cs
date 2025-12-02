@@ -117,6 +117,7 @@ namespace TuningStore.Services
                 Id = part.Id,
                 Name = part.Name,
                 Price = part.Price,
+                Quantity = part.Quantity,
                 PartCategoryId = part.PartCategoryId,
                 CarSpecificationId = part.CarSpecificationId,
                 CreatedBy = part.CreatedBy,

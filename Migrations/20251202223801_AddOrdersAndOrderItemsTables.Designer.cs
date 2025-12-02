@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TuningStore.Data;
 
@@ -11,9 +12,11 @@ using TuningStore.Data;
 namespace server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251202223801_AddOrdersAndOrderItemsTables")]
+    partial class AddOrdersAndOrderItemsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -530,10 +533,6 @@ namespace server.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("created_by");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -555,10 +554,6 @@ namespace server.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_at");
 
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int")
-                        .HasColumnName("updated_by");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -566,10 +561,6 @@ namespace server.Migrations
                         .HasColumnName("username");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
-
-                    b.HasIndex("UpdatedBy");
 
                     b.ToTable("Users");
                 });
@@ -738,21 +729,6 @@ namespace server.Migrations
                     b.Navigation("Model");
 
                     b.Navigation("TransmissionType");
-
-                    b.Navigation("Updater");
-                });
-
-            modelBuilder.Entity("TuningStore.Models.User", b =>
-                {
-                    b.HasOne("TuningStore.Models.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy");
-
-                    b.HasOne("TuningStore.Models.User", "Updater")
-                        .WithMany()
-                        .HasForeignKey("UpdatedBy");
-
-                    b.Navigation("Creator");
 
                     b.Navigation("Updater");
                 });

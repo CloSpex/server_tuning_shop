@@ -2,13 +2,27 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TuningStore.DTOs
 {
-    public class UserDto : BaseDto
+    public class UserDto : BaseCreatorDto
     {
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? Role { get; set; } = "User";
     }
+    public class PagedResult<T>
+    {
+        public IEnumerable<T> Data { get; set; } = Enumerable.Empty<T>();
+        public int TotalCount { get; set; }
+        public int CurrentPage { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+    }
 
+    public class PaginationParams
+    {
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? SearchTerm { get; set; }
+    }
     public class CreateUserDto
     {
         [Required]
@@ -26,6 +40,13 @@ namespace TuningStore.DTOs
         public string Password { get; set; } = string.Empty;
     }
 
+    public class UpdateRoleDto
+    {
+        [Required]
+        [StringLength(50)]
+        public string? Role { get; set; }
+    }
+
     public class UpdateUserDto
     {
         [StringLength(255, MinimumLength = 3)]
@@ -38,10 +59,8 @@ namespace TuningStore.DTOs
 
         [StringLength(255, MinimumLength = 6)]
         public string? Password { get; set; }
-
-        [StringLength(50)]
-        public string? Role { get; set; }
     }
+
     public class LoginDto
     {
         [Required]

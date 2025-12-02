@@ -12,8 +12,10 @@ namespace TuningStore.Services
         Task<UserDto?> GetUserByUsernameAsync(string username);
         Task<UserDto?> GetUserByEmailAsync(string email);
         Task<UserDto> CreateUserAsync(CreateUserDto createUserDto);
-        Task<UserDto?> UpdateUserAsync(int id, UpdateUserDto updateUserDto);
+        Task<UserDto?> UpdateUserAsync(int id, UpdateUserDto updateUserDto, int currentUserId);
+        Task<UserDto?> UpdateUserRoleAsync(int id, UpdateRoleDto updateRoleDto, int adminUserId);
         Task<bool> DeleteUserAsync(int id);
+
         Task<LoginResponseDto?> AuthenticateAsync(LoginDto loginDto, string? ipAddress = null);
         Task<TokenResponseDto?> RefreshTokenAsync(string accessToken, string refreshToken, string? ipAddress = null);
         Task<bool> RevokeTokenAsync(string refreshToken, string? ipAddress = null);
@@ -86,7 +88,7 @@ namespace TuningStore.Services
             return MapToDto(user);
         }
 
-        public async Task<UserDto?> UpdateUserAsync(int id, UpdateUserDto updateUserDto)
+        public async Task<UserDto?> UpdateUserAsync(int id, UpdateUserDto updateUserDto, int currentUserId)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
@@ -117,12 +119,41 @@ namespace TuningStore.Services
                 user.Password = BCrypt.Net.BCrypt.HashPassword(updateUserDto.Password);
             }
 
-            if (!string.IsNullOrEmpty(updateUserDto.Role))
+            user.UpdatedBy = currentUserId;
+            await _userRepository.UpdateAsync(user);
+            return MapToDto(user);
+        }
+
+        public async Task<UserDto?> UpdateUserRoleAsync(int id, UpdateRoleDto updateRoleDto, int adminUserId)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+                return null;
+
+            var newRole = updateRoleDto.Role;
+
+            if (string.IsNullOrEmpty(newRole))
             {
-                user.Role = updateUserDto.Role;
+                throw new InvalidOperationException("Role cannot be empty.");
             }
 
-            await _userRepository.UpdateAsync(user);
+            if (newRole == user.Role)
+            {
+                return MapToDto(user);
+            }
+
+            if (user.Role == "Admin" && newRole != "Admin")
+            {
+                if (await _userRepository.CountAdminsAsync() <= 1)
+                {
+                    throw new InvalidOperationException("Cannot demote the last administrator.");
+                }
+            }
+
+            user.Role = newRole;
+            user.UpdatedBy = adminUserId;
+
+            await _userRepository.UpdateRoleAsync(user);
             return MapToDto(user);
         }
 
@@ -131,6 +162,11 @@ namespace TuningStore.Services
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
                 return false;
+
+            if (user.Role == "Admin" && await _userRepository.CountAdminsAsync() <= 1)
+            {
+                throw new InvalidOperationException("Cannot delete the last administrator.");
+            }
 
             await _userRepository.DeleteAsync(id);
             return true;
@@ -244,7 +280,9 @@ namespace TuningStore.Services
                 Email = user.Email,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt,
-                Role = user.Role
+                Role = user.Role,
+                CreatedBy = user.CreatedBy,
+                UpdatedBy = user.UpdatedBy
             };
         }
     }

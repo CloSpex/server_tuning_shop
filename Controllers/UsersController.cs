@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TuningStore.Authorization.Policies;
@@ -68,9 +69,11 @@ namespace TuningStore.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var currentUserId = int.Parse(User.FindFirst("id")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
             try
             {
-                var updatedUser = await _userService.UpdateUserAsync(id, updateUserDto);
+                var updatedUser = await _userService.UpdateUserAsync(id, updateUserDto, currentUserId);
                 if (updatedUser == null)
                     return NotFound($"User with ID {id} not found.");
 
@@ -86,6 +89,33 @@ namespace TuningStore.Controllers
             }
         }
 
+        [HttpPatch("{id}/role")]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        public async Task<ActionResult<UserDto>> UpdateUserRole(int id, [FromBody] UpdateRoleDto updateRoleDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var adminUserId = int.Parse(User.FindFirst("id")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+            try
+            {
+                var updatedUser = await _userService.UpdateUserRoleAsync(id, updateRoleDto, adminUserId);
+                if (updatedUser == null)
+                    return NotFound($"User with ID {id} not found.");
+
+                return Ok(updatedUser);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while updating the user role.");
+            }
+        }
+
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
         public async Task<ActionResult> DeleteUser(int id)
@@ -98,12 +128,14 @@ namespace TuningStore.Controllers
 
                 return NoContent();
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, "An error occurred while deleting the user.");
             }
         }
-
     }
-
 }

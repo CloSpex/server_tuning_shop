@@ -12,9 +12,12 @@ namespace TuningStore.Repositories
         Task<User?> GetByEmailAsync(string email);
         Task AddAsync(User user);
         Task UpdateAsync(User user);
+        Task UpdateRoleAsync(User user);
         Task DeleteAsync(int id);
         Task<bool> UsernameExistsAsync(string username);
         Task<bool> EmailExistsAsync(string email);
+        Task<int> CountAdminsAsync();
+
     }
 
     public class UserRepository : IUserRepository
@@ -62,17 +65,38 @@ namespace TuningStore.Repositories
 
         public async Task UpdateAsync(User user)
         {
-
             var existingUser = await _users.FindAsync(user.Id);
             if (existingUser == null)
                 return;
+
             if (!string.IsNullOrWhiteSpace(user.Username))
                 existingUser.Username = user.Username;
             if (!string.IsNullOrWhiteSpace(user.Email))
                 existingUser.Email = user.Email;
+            if (!string.IsNullOrWhiteSpace(user.Password))
+                existingUser.Password = user.Password;
 
+            existingUser.UpdatedBy = user.UpdatedBy;
             existingUser.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateRoleAsync(User user)
+        {
+            var existingUser = await _users.FindAsync(user.Id);
+            if (existingUser == null)
+                return;
+
+            existingUser.Role = user.Role;
+            existingUser.UpdatedBy = user.UpdatedBy;
+            existingUser.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> CountAdminsAsync()
+        {
+            return await _users
+                .CountAsync(u => u.Role == "Admin");
         }
 
         public async Task DeleteAsync(int id)

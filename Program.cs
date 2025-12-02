@@ -1,3 +1,4 @@
+
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using TuningStore.Data;
@@ -10,6 +11,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using TuningStore.Authorization.Requirements;
 using TuningStore.Authorization.Policies;
+using TuningStore.DTOs;
+using TuningStore.Models;
 using System.Text;
 using Scalar.AspNetCore;
 using Microsoft.OpenApi.Models;
@@ -26,12 +29,16 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddCors(options =>
 {
+    var allowedOrigins = builder.Configuration["AllowedOrigins"]?.Split(";")
+                         ?? new[] { "http://localhost:5173" };
+
     options.AddPolicy("AllowReactApp", policy =>
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
 });
+
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -99,9 +106,42 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ISpecificationRepository, SpecificationRepository>();
 builder.Services.AddScoped<ISpecificationService, SpecificationService>();
 builder.Services.AddScoped<IPartRepository, PartRepository>();
+
+builder.Services.AddScoped<IPartCategoryRepository, PartCategoryRepository>();
+builder.Services.AddScoped<IPartCategoryService, PartCategoryService>();
+
+builder.Services.AddScoped(typeof(ICarEnumRepository<>), typeof(CarEnumRepository<>));
+builder.Services.AddScoped<ICarEnumService<EngineType, EngineTypeDto, CreateEngineTypeDto, UpdateEngineTypeDto>>(sp =>
+    new CarEnumService<EngineType, EngineTypeDto, CreateEngineTypeDto, UpdateEngineTypeDto>(
+        sp.GetRequiredService<ICarEnumRepository<EngineType>>(),
+        e => new EngineTypeDto { Id = e.Id, Name = e.Name },
+        (e, dto) => { e.Name = dto.Name; },
+        (e, dto) => { if (!string.IsNullOrWhiteSpace(dto.Name)) e.Name = dto.Name; }
+    ));
+
+builder.Services.AddScoped<ICarEnumService<BodyType, BodyTypeDto, CreateBodyTypeDto, UpdateBodyTypeDto>>(sp =>
+    new CarEnumService<BodyType, BodyTypeDto, CreateBodyTypeDto, UpdateBodyTypeDto>(
+        sp.GetRequiredService<ICarEnumRepository<BodyType>>(),
+        e => new BodyTypeDto { Id = e.Id, Name = e.Name },
+        (e, dto) => { e.Name = dto.Name; },
+        (e, dto) => { if (!string.IsNullOrWhiteSpace(dto.Name)) e.Name = dto.Name; }
+    ));
+
+builder.Services.AddScoped<ICarEnumService<TransmissionType, TransmissionTypeDto, CreateTransmissionTypeDto, UpdateTransmissionTypeDto>>(sp =>
+    new CarEnumService<TransmissionType, TransmissionTypeDto, CreateTransmissionTypeDto, UpdateTransmissionTypeDto>(
+        sp.GetRequiredService<ICarEnumRepository<TransmissionType>>(),
+        e => new TransmissionTypeDto { Id = e.Id, Name = e.Name },
+        (e, dto) => { e.Name = dto.Name; },
+        (e, dto) => { if (!string.IsNullOrWhiteSpace(dto.Name)) e.Name = dto.Name; }
+    ));
+
+
+
 builder.Services.AddScoped<IPartService, PartService>();
 builder.Services.AddScoped<IFaqRepository, FaqRepository>();
 builder.Services.AddScoped<IFaqService, FaqService>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
@@ -146,14 +186,16 @@ builder.Services.AddOpenApi(options =>
 var app = builder.Build();
 
 app.MapOpenApi();
-app.MapScalarApiReference(options =>
+if (app.Environment.IsDevelopment())
 {
-    options
-        .WithTitle("TuningStore API")
-        .WithTheme(ScalarTheme.Purple)
-        .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-});
-
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("TuningStore API")
+            .WithTheme(ScalarTheme.Purple)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
+}
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 app.UseMiddleware<ErrorHandlingMiddleware>();
