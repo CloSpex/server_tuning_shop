@@ -9,6 +9,8 @@ using TuningStore.Models;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
 public class CarEnumsController : ControllerBase
 {
     private readonly ICarEnumService<EngineType, EngineTypeDto, CreateEngineTypeDto, UpdateEngineTypeDto> _engineService;
@@ -26,9 +28,13 @@ public class CarEnumsController : ControllerBase
     }
 
     [HttpGet("enginetypes")]
+    [ProducesResponseType(typeof(IEnumerable<EngineTypeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<EngineTypeDto>> GetEngineTypes() => await _engineService.GetAllAsync();
 
     [HttpGet("enginetypes/{id}")]
+    [ProducesResponseType(typeof(EngineTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<EngineTypeDto>> GetEngineTypeById(int id)
     {
         var result = await _engineService.GetByIdAsync(id);
@@ -36,9 +42,14 @@ public class CarEnumsController : ControllerBase
     }
 
     [HttpGet("bodytypes")]
+
+    [ProducesResponseType(typeof(IEnumerable<EngineTypeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<BodyTypeDto>> GetBodyTypes() => await _bodyService.GetAllAsync();
 
     [HttpGet("bodytypes/{id}")]
+    [ProducesResponseType(typeof(EngineTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BodyTypeDto>> GetBodyTypeById(int id)
     {
         var result = await _bodyService.GetByIdAsync(id);
@@ -46,12 +57,17 @@ public class CarEnumsController : ControllerBase
     }
 
     [HttpGet("transmissiontypes")]
+
+    [ProducesResponseType(typeof(IEnumerable<EngineTypeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IEnumerable<TransmissionTypeDto>> GetTransmissionTypes() => await _transService.GetAllAsync();
 
     [HttpGet("transmissiontypes/{id}")]
+    [ProducesResponseType(typeof(EngineTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TransmissionTypeDto>> GetTransmissionTypeById(int id)
     {
-        var result = await _transService.GetByIdAsync(id);  // FIXED
+        var result = await _transService.GetByIdAsync(id);
         return result == null ? NotFound() : Ok(result);
     }
 }

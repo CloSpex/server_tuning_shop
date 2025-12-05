@@ -10,6 +10,8 @@ namespace TuningStore.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public class BrandController : ControllerBase
     {
         private readonly IBrandService _brandService;
@@ -21,6 +23,8 @@ namespace TuningStore.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<BrandDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetBrands()
         {
             var brands = await _brandService.GetAllBrandsAsync();
@@ -29,6 +33,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(BrandDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BrandDto>> GetBrand(int id)
         {
             var brand = await _brandService.GetBrandByIdAsync(id);
@@ -41,6 +47,10 @@ namespace TuningStore.Controllers
 
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(BrandDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<BrandDto>> CreateBrand([FromBody] CreateBrandDto createBrandDto)
         {
             if (!ModelState.IsValid)
@@ -63,6 +73,11 @@ namespace TuningStore.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(BrandDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<BrandDto>> UpdateBrand(int id, [FromBody] UpdateBrandDto updateBrandDto)
         {
             if (!ModelState.IsValid)
@@ -88,6 +103,9 @@ namespace TuningStore.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteBrand(int id)
         {
             try

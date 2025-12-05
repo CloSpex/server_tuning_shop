@@ -9,6 +9,8 @@ namespace TuningStore.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public class PartsController : ControllerBase
     {
         private readonly IPartService _partService;
@@ -20,6 +22,8 @@ namespace TuningStore.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<PartDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PartDto>>> GetParts()
         {
             var parts = await _partService.GetAllPartsAsync();
@@ -28,6 +32,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(PartDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<PartDto>> GetPart(int id)
         {
             var part = await _partService.GetPartByIdAsync(id);
@@ -40,6 +46,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("category/{categoryId}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<PartDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PartDto>>> GetPartsByCategory(int categoryId)
         {
             var parts = await _partService.GetPartsByCategoryAsync(categoryId);
@@ -48,6 +56,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("specification/{specificationId}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<PartDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PartDto>>> GetPartsBySpecification(int specificationId)
         {
             var parts = await _partService.GetPartsBySpecificationAsync(specificationId);
@@ -56,6 +66,10 @@ namespace TuningStore.Controllers
 
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(PartDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PartDto>> CreatePart([FromBody] CreatePartDto createPartDto)
         {
             if (!ModelState.IsValid)
@@ -78,6 +92,11 @@ namespace TuningStore.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(PartDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PartDto>> UpdatePart(int id, [FromBody] UpdatePartDto updatePartDto)
         {
             if (!ModelState.IsValid)
@@ -104,6 +123,9 @@ namespace TuningStore.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeletePart(int id)
         {
             try

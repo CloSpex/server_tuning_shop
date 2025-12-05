@@ -10,6 +10,8 @@ namespace TuningStore.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -31,6 +33,8 @@ namespace TuningStore.Controllers
 
         [HttpGet]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(IEnumerable<OrderDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders()
         {
             var orders = await _orderService.GetAllOrdersAsync();
@@ -38,6 +42,8 @@ namespace TuningStore.Controllers
         }
 
         [HttpGet("me")]
+        [ProducesResponseType(typeof(IEnumerable<OrderDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetMyOrders()
         {
             var userId = GetCurrentUserId();
@@ -47,6 +53,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Policy = AuthorizationPolicies.UserOrAdmin)]
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
@@ -63,6 +71,9 @@ namespace TuningStore.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] CreateOrderDto createOrderDto)
         {
             if (!ModelState.IsValid)
@@ -86,6 +97,10 @@ namespace TuningStore.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<OrderDto>> UpdateOrder(int id, [FromBody] UpdateOrderDto updateOrderDto)
         {
             if (!ModelState.IsValid)
@@ -108,6 +123,9 @@ namespace TuningStore.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             try

@@ -10,6 +10,8 @@ namespace TuningStore.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public class ModelController : ControllerBase
     {
 
@@ -21,6 +23,8 @@ namespace TuningStore.Controllers
         }
         [HttpGet]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<ModelDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<ModelDto>>> GetModels()
         {
             var models = await _modelService.GetAllModelsAsync();
@@ -28,6 +32,8 @@ namespace TuningStore.Controllers
         }
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(ModelDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ModelDto>> GetModel(int id)
         {
             var model = await _modelService.GetModelByIdAsync(id);
@@ -36,6 +42,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("brand/{brandId}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<ModelDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<ModelDto>>> GetModelsByBrand(int brandId)
         {
             var models = await _modelService.GetModelsByBrandIdAsync(brandId);
@@ -43,6 +51,10 @@ namespace TuningStore.Controllers
         }
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(ModelDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ModelDto>> CreateModel([FromBody] CreateModelDto createModelDto)
         {
             if (!ModelState.IsValid)
@@ -53,6 +65,10 @@ namespace TuningStore.Controllers
         }
         [HttpPatch("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(ModelDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ModelDto>> UpdateModel(int id, [FromBody] UpdateModelDto updateModelDto)
         {
             if (!ModelState.IsValid)
@@ -63,6 +79,9 @@ namespace TuningStore.Controllers
         }
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteModel(int id)
         {
             var success = await _modelService.DeleteModelAsync(id);

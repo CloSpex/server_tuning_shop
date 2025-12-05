@@ -9,6 +9,8 @@ namespace TuningStore.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public class PartCategoriesController : ControllerBase
     {
         private readonly IPartCategoryService _service;
@@ -20,6 +22,8 @@ namespace TuningStore.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<PartCategoryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<PartCategoryDto>>> GetAll()
         {
             var categories = await _service.GetAllCategoriesAsync();
@@ -28,6 +32,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(PartCategoryDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<PartCategoryDto>> GetById(int id)
         {
             var category = await _service.GetCategoryByIdAsync(id);
@@ -39,6 +45,9 @@ namespace TuningStore.Controllers
 
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(PartCategoryDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<PartCategoryDto>> Create([FromBody] CreatePartCategoryDto dto)
         {
             if (!ModelState.IsValid)
@@ -50,6 +59,11 @@ namespace TuningStore.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(PartCategoryDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+
         public async Task<ActionResult<PartCategoryDto>> Update(int id, [FromBody] UpdatePartCategoryDto dto)
         {
             if (!ModelState.IsValid)
@@ -64,6 +78,9 @@ namespace TuningStore.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _service.DeleteCategoryAsync(id);

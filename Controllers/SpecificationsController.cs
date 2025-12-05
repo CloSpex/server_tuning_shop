@@ -9,6 +9,8 @@ namespace TuningStore.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public class SpecificationsController : ControllerBase
     {
         private readonly ISpecificationService _specificationService;
@@ -20,6 +22,8 @@ namespace TuningStore.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<SpecificationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<SpecificationDto>>> GetSpecifications()
         {
             var specifications = await _specificationService.GetAllSpecificationsAsync();
@@ -27,6 +31,8 @@ namespace TuningStore.Controllers
         }
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(SpecificationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<SpecificationDto>> GetSpecification(int id)
         {
             var specification = await _specificationService.GetSpecificationByIdAsync(id);
@@ -39,6 +45,8 @@ namespace TuningStore.Controllers
 
         [HttpGet("model/{modelId}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<SpecificationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<SpecificationDto>>> GetSpecificationsByModelId(int modelId)
         {
             var specifications = await _specificationService.GetSpecificationsByModelIdAsync(modelId);
@@ -46,6 +54,10 @@ namespace TuningStore.Controllers
         }
         [HttpPost]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(SpecificationDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<SpecificationDto>> CreateSpecification(
             [FromBody] CreateSpecificationDto createSpecificationDto)
         {
@@ -72,6 +84,11 @@ namespace TuningStore.Controllers
 
         [HttpPatch("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(typeof(SpecificationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<SpecificationDto>> UpdateSpecification(
             int id,
             [FromBody] UpdateSpecificationDto updateSpecificationDto)
@@ -100,6 +117,9 @@ namespace TuningStore.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteSpecification(int id)
         {
             try
