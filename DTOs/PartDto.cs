@@ -6,6 +6,7 @@ namespace TuningStore.DTOs
     {
         public string Name { get; set; } = string.Empty;
         public decimal? Price { get; set; }
+        public string? Color { get; set; }
         public int? Quantity { get; set; }
         public string ImagePath { get; set; } = "images/default_part_image.jpg";
         public int CarSpecificationId { get; set; }
