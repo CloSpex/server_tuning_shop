@@ -30,10 +30,30 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddCors(options =>
 {
     var allowedOrigins = builder.Configuration["AllowedOrigins"]?.Split(";")
-                         ?? new[] { "http://localhost:5173" };
+                        ?? new[] { "http://localhost:5173" };
+    foreach (var item in allowedOrigins)
+    {
+        Console.WriteLine(item);
+    }
+    var originsList = allowedOrigins
+     .SelectMany(origin =>
+     {
+         var trimmed = origin.Trim();
+         if (string.IsNullOrWhiteSpace(trimmed)) return Enumerable.Empty<string>();
+
+         return new[]
+         {
+            trimmed,
+            trimmed.StartsWith("http://") ? trimmed.Replace("http://", "https://") :
+            trimmed.StartsWith("https://") ? trimmed.Replace("https://", "http://") :
+            null
+         }.Where(x => x != null)!;
+     })
+     .Distinct()
+     .ToArray();
 
     options.AddPolicy("AllowReactApp", policy =>
-        policy.WithOrigins(allowedOrigins)
+        policy.WithOrigins(originsList)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials());
